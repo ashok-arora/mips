@@ -7,10 +7,11 @@
  */
 
 #include <iostream>
-#include <cstring>
 #include <fstream>
-#include <cassert>
-
+// #include <sstream>
+#include "tokens.hpp"
+#include "registers.hpp"
+#include <limits>
 
 int main(int argc, char **argv){
     if (argc < 2){
@@ -19,9 +20,19 @@ int main(int argc, char **argv){
     }
     std::string text;
     std::ifstream fileName(argv[1]);
-
-    while(getline(fileName, text)){
-        std::cout << text << std::endl;
+    while(fileName >> text){
+        // std::cout << text << "\n";
+        // get just the first word of each line and ignore the rest
+        // fileName.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if(tokens.find(text) != tokens.end()) {
+            std::cout << "Acceptable token: " << text << std::endl;
+        }
+        else if (unsupported.find(text) != unsupported.end()){
+            std::cout << "Unsupported token: " << text << std::endl;
+        }
+    }
+    if(registers.find("ra")!= registers.end()){
+        std::cout << "Currently, register $" <<registers.find("ra")->first << " has value " << registers.find("ra")->second << std::endl;
     }
 
     return 0;
