@@ -34,6 +34,10 @@ int main(int argc, char **argv){
         std::istringstream ss(text);
         std::string token;
         ss >> token;
+        if ( token == "#" ){
+            std::cout << "[Debug] Comment: " << text << std::endl;
+            continue;
+        }
         // TODO: getline and split by space
         // std::cout << text << "\n";
         // get just the first word of each line and ignore the rest
@@ -46,7 +50,7 @@ int main(int argc, char **argv){
                 ss >> rs >> rd >> imm;
                 rs.pop_back();
                 rd.pop_back();
-                std::cout << rs << " " << rd << " " << imm << std::endl;
+                std::cout << "[Debug] " << rs << " " << rd << " " << imm << std::endl;
                 std::vector<std::pair<std::string, int>>::iterator find_rs, find_rd;
                 find_rs = std::find_if(registers.begin(), registers.end(), CompareFirst(rs));
                 find_rd = std::find_if(registers.begin(), registers.end(), CompareFirst(rd));
@@ -56,7 +60,7 @@ int main(int argc, char **argv){
                 } else {
                     std::cout << "[Debug] Register " << rs << " not found. " <<std::endl;
                 }
-                std::cout << find_rs->second << " " << find_rd->second << " " << imm;
+                // std::cout << find_rs->second << " " << find_rd->second << " " << imm;
                 find_rs->second = find_rd->second + imm;
             }
 
