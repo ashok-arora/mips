@@ -3,15 +3,15 @@
  * 2. execute line by line
     ** list of accepted tokens
  * 3. print output to file [done]
- * 4. point out error
+ * 4. point out error [done]
  */
 
 #include <iostream>
 #include <fstream>
-// #include <sstream>
+#include <sstream>
 #include "tokens.hpp"
 #include "registers.hpp"
-#include <limits>
+//#include <limits>
 #include <algorithm>
 
 int main(int argc, char **argv){
@@ -21,36 +21,73 @@ int main(int argc, char **argv){
         std::cout << "[Error] Expected input file as first argument. None found." << std::endl;
         return -1;
     }
-    else if (argc < 3){
+    if (argc < 3){
         std::cout << "[Warning] Expected output file as second argument! None found. Defaulting to `./build/output.txt`" << std::endl;
         fileBuffer.open("./build/output.txt", std::ios::out);
+    } else {
+        fileBuffer.open(argv[2], std::ios::out);
     }
 
-    fileBuffer.open(argv[2], std::ios::out);
     std::string text;
     std::ifstream fileName(argv[1]);
-    while(fileName >> text){
+    while(getline(fileName, text)){
+        std::istringstream ss(text);
+        std::string token;
+        ss >> token;
+        // TODO: getline and split by space
         // std::cout << text << "\n";
         // get just the first word of each line and ignore the rest
         // fileName.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        if(tokens.find(text) != tokens.end()) {
-            std::cout << "Acceptable token: " << text << std::endl;
+        if (tokens.find(token) != tokens.end()) {
+            std::cout << "[Debug] Acceptable token: " << token << std::endl;
+            if (token == "addi"){
+                std::string rs, rd;
+                int imm;
+                ss >> rs >> rd >> imm;
+                rs.pop_back();
+                rd.pop_back();
+                std::cout << rs << " " << rd << " " << imm << std::endl;
+                std::vector<std::pair<std::string, int>>::iterator find_rs, find_rd;
+                find_rs = std::find_if(registers.begin(), registers.end(), CompareFirst(rs));
+                find_rd = std::find_if(registers.begin(), registers.end(), CompareFirst(rd));
+
+                if(find_rs != registers.end()) {
+                    std::cout << "[Debug] Currently, register " << find_rs->first << " has value " << find_rs->second << std::endl;
+                } else {
+                    std::cout << "[Debug] Register " << rs << " not found. " <<std::endl;
+                }
+                std::cout << find_rs->second << " " << find_rd->second << " " << imm;
+                find_rs->second = find_rd->second + imm;
+            }
+
         }
-        else if (unsupported.find(text) != unsupported.end()){
-            std::cout << "Unsupported token: " << text << std::endl;
+            // TODO: action to take when token is found
+            // each token has a certain number of arguments with it and performs a specific task.
+        else if (unsupported.find(token) != unsupported.end()) {
+            std::cout << "[Warning] Unsupported token: " << token << " will not be executed." << std::endl;
+        } else {
+            std::cout << "[Error] Cannot parse line: " << text << std::endl;
         }
+
     }
-    std::vector<std::pair<std::string, int>>::iterator findIt = std::find_if(registers.begin(), registers.end(), CompareFirst("ra"));
-    if(findIt != registers.end()) {
-        std::cout << "Currently, register $" << findIt->first << " has value " << findIt->second << std::endl;
-    } else {
-        std::cout << "Register $ra not found. " <<std::endl;
-    }
+//    std::vector<std::pair<std::string, int>>::iterator findIt;
+//    findIt = std::find_if(registers.begin(), registers.end(), CompareFirst("ra"));
+//    if(findIt != registers.end()) {
+//        std::cout << "Currently, register $" << findIt->first << " has value " << findIt->second << std::endl;
+//    } else {
+//        std::cout << "Register $ra not found. " <<std::endl;
+//    }
 
     std::vector<std::pair<std::string, int>>::iterator iter;
     for (iter = registers.begin() ; iter != registers.end() ; iter++){
         output << iter->first << " = " << iter->second << std::endl;
     }
-
+    std::cout << "[Debug] Output saved to file." << std::endl;
     return 0;
 }
+
+
+// input
+// parse
+// execute
+// output
